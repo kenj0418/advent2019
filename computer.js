@@ -12,6 +12,9 @@ const getParam = (paramMode, computer, param) => {
   switch (paramMode) {
     case 0: return computer.memory[param]; // position mode
     case 1: return param; // immediate mode
+    case 2: 
+      // console.log(`Getting value relative mode: @${computer.RBASE}+${param} : ${computer.memory[computer.RBASE + param]}`);
+      return computer.memory[computer.RBASE + param]; // relative mode
     default: throw new Error(`Invalid Parameter Mode: ${paramMode}`);
   }
 }
@@ -23,6 +26,9 @@ const putParam = (paramMode, computer, param, value) => {
       return;
     case 1: // immediate mode
       throw new Error("Immediate Mode Not Supported for Write Parameters");
+    case 2: // relative mode
+      computer.memory[computer.RBASE + param] = value;
+      return;
     default: throw new Error(`Invalid Parameter Mode: ${paramMode}`);
   }
 }
@@ -91,14 +97,13 @@ const stop = (computer) => {
   computer.STOP = true;
 }
 
-
-const consoleIn = () => {
-  return parseInt(readlineSync.question("Enter value: "));
-}
-
 const write = (computer, paramModes) => {
   const param1 = computer.memory[computer.PC + 1]
   const value = getParam(paramModes[1], computer, param1);
+
+  if (value == undefined) {
+    throw new Error("Undefined output");
+  }
 
   if (computer.outputs) {
     computer.outputs.push(value);
@@ -122,6 +127,15 @@ const read = (computer, paramModes) => {
   computer.PC += 2;
 }
 
+const adustRelativeBase = (computer, paramModes) => {
+  const param1 = computer.memory[computer.PC + 1]
+  const value = getParam(paramModes[1], computer, param1);
+
+  // console.log(`setting adjusting RBASE by ${value} to ${computer.RBASE + value}`);
+  computer.RBASE += value;
+  computer.PC += 2;
+}
+
 const parseInstruction = (instr) => {
   return {
     opCode: instr % 100,
@@ -133,9 +147,15 @@ const parseInstruction = (instr) => {
   };
 }
 
+const sleep = (ms) => {
+  var start = new Date().getTime(), expire = start + ms;
+  while (new Date().getTime() < expire) { }
+}
+
 const step = (computer) => {
   const instr = parseInstruction(computer.memory[computer.PC]);
   // console.log(computer.PC, computer.memory[computer.PC], instr);
+  // sleep(1000); //todo stepping while debugging
 
   switch (instr.opCode) {
     case 1:
@@ -170,6 +190,10 @@ const step = (computer) => {
       compareOp(computer, instr.paramModes, equalOp);
       break;
   
+    case 9:
+      adustRelativeBase(computer, instr.paramModes);
+      break;
+
     case 99:
       stop(computer);
       break;
@@ -182,6 +206,7 @@ const initComputer = (initialMemory, inputs = null, outputs = null) => {
   return {
     PC: 0,
     STOP: false,
+    RBASE: 0,
     memory: JSON.parse(JSON.stringify(initialMemory)),
 
     inputs,

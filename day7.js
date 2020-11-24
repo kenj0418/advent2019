@@ -1,6 +1,5 @@
 const {readArrayFromFile} = require("./lib");
 const {executeProgram, initComputer, runUntilOutputOrHalt} = require("./computer");
-const computer = require("./computer");
 
 const executeAmplifier = (initialProgram, phaseSetting, input) => {
   let inputs = [phaseSetting, input];
