@@ -49,7 +49,7 @@ const findLargestOnePass = (initialProgram) => {
 
   permutations.forEach(setting => {
     const value = executeWithSetting(initialProgram, setting);
-    console.log(`${setting} : ${value}`);
+    // console.log(`${setting} : ${value}`);
     if (value > maxValue) {
       maxValue = value;
       maxSettings = JSON.parse(JSON.stringify(setting));
@@ -107,13 +107,13 @@ const findLargestMultiPass = (initialProgram) => {
     }
   })
 
-  console.log(`MAX SETTING: ${maxSettings}`);
-  console.log(`MAX VALUE: ${maxValue}`);
+  console.log(`MULTIPASS MAX SETTING: ${maxSettings}`);
+  console.log(`MULTIPASS MAX VALUE: ${maxValue}`);
 }
 
 const run = () => {
   const initialProgram = readArrayFromFile("./day7.txt", ",");
-  // findLargest(initialProgram);
+  findLargestOnePass(initialProgram);
   findLargestMultiPass(initialProgram);
 }
 

@@ -115,8 +115,8 @@ const run = () => {
   const graph = generateOrbitGraph(orbits);
   // console.log(graph);
 
-  // const orbitCount = computeOrbitCount(graph);
-  // console.log(orbitCount);
+  const orbitCount = computeOrbitCount(graph);
+  console.log(orbitCount);
 
   const commonRoot = findCommonRoot(graph, "COM", "YOU", "SAN");
   console.log(`Common root: ${commonRoot}`);

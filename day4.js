@@ -30,19 +30,19 @@ const next = (dig) => {
   } 
 }
 
-// const hasAdjacentDigits = (dig) => {
-//   if (dig.length < 2) {
-//     return false;
-//   }
+const hasAdjacentDigits = (dig) => {
+  if (dig.length < 2) {
+    return false;
+  }
 
-//   for (let i = 1; i < dig.length; ++i) {
-//     if (dig[i - 1] == dig[i]) {
-//       return true;
-//     }
-//   }
+  for (let i = 1; i < dig.length; ++i) {
+    if (dig[i - 1] == dig[i]) {
+      return true;
+    }
+  }
 
-//   return false;
-// }
+  return false;
+}
 
 const hasAdjacentDigitsNotPartOfLargerGroup = (dig) => {
   if (dig.length < 2) {
@@ -86,6 +86,7 @@ const isValid = (dig) => {
 
   // implied by the execution:  The value is within the range given in your puzzle input.
 
+  // if (!hasAdjacentDigits(dig)) {
   if (!hasAdjacentDigitsNotPartOfLargerGroup(dig)) {
     return false; // Two adjacent digits are the same (like 22 in 122345).
   }
@@ -99,8 +100,8 @@ const isValid = (dig) => {
 
 const run = () => {
   // make sure same number of digits (pad with zeros if needed)
-  const startRange = "382345";
-  const endRange   = "843167";
+  const startRange = "278384";
+  const endRange   = "824795";
   
   let stopDigits = parseNumberToArray(endRange);
 

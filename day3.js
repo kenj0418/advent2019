@@ -47,12 +47,12 @@ const intersection = (path1, path2) => {
   return Array.from(intersect);
 }
 
-// const taxiDistance = (point1, point2 = "0:0") => {
-//   const p1 = point1.split(":");
-//   const p2 = point2.split(":");
+const taxiDistance = (point1, point2 = "0:0") => {
+  const p1 = point1.split(":");
+  const p2 = point2.split(":");
 
-//   return Math.abs(p1[0] - p2[0]) + Math.abs(p1[1] - p2[1]);
-// }
+  return Math.abs(p1[0] - p2[0]) + Math.abs(p1[1] - p2[1]);
+}
 
 const combinedStepDistance = (path1, path2, point) => {
   return path1[point] + path2[point];
@@ -61,10 +61,16 @@ const combinedStepDistance = (path1, path2, point) => {
 const run = () => {
   const wires = readListsFromFile("./day3.txt");
   // console.log(wires);
+
   const paths = wires.map(computePath);
   // console.log(paths);
   const intersections = intersection(paths[0], paths[1]);
   // console.log(intersections);
+
+  const taxiDistances = intersections.map((point) => {return taxiDistance(point)});
+  // console.log(taxiDistances);
+  console.log(Math.min(...taxiDistances));
+
   const distances = intersections.map((point) => {return combinedStepDistance(paths[0], paths[1], point)});
   // console.log(distances);
   console.log(Math.min(...distances));
