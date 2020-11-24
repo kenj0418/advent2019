@@ -38,33 +38,65 @@ const isValidStep = (x, y) => {
   }
 }
 
+const clockwiseAngle = (c) => {
+  let angleInRadians = Math.atan2(c.x, c.y);
+  return Math.PI / 2 - angleInRadians;
+}
+
+const clockwise = (a, b) => {
+  return clockwiseAngle(a) - clockwiseAngle(b);
+}
+
+const getDirections = (map) => {
+  const maxX = getMaxX(map);
+  const maxY = getMaxY(map);
+  let directions = []
+
+  for (let x = -maxX; x <= maxY; x++) {
+    for (let y = -maxY; y <= maxY; y++) {
+      if (isValidStep(x, y)) {
+        directions.push({x, y});
+      }
+    }
+  }
+
+  directions.sort(clockwise);
+  return directions;
+}
+
+const getAsteroidsInDirection = (map, x, y, dir) => {
+  const maxX = getMaxX(map);
+  const maxY = getMaxY(map);
+
+  let currX = x + dir.x;
+  let currY = y + dir.y;
+
+  const currLos = []
+  while (isOnMap(currX, currY, maxX, maxY)) {
+    if (hasAsteroid(map, currX, currY)) {
+      currLos.push({x: currX, y: currY});
+    }
+    currX += dir.x;
+    currY += dir.y;
+  }
+
+  return currLos;
+}
+
+
 const getLinesOfSight = (map, x, y) => {
   const maxX = getMaxX(map);
   const maxY = getMaxY(map);
   let losList = []
 
-  for (let xStep = -maxX; xStep <= maxY; xStep++) {
-    for (let yStep = -maxY; yStep <= maxY; yStep++) {
-      if (!isValidStep(xStep, yStep)) {
-        continue;
-      }
-
-      // console.log(`xStep:${xStep}, yStep:${yStep}`);
-      let currX = x + xStep;
-      let currY = y + yStep;
-
-      const currLos = []
-      while (isOnMap(currX, currY, maxX, maxY)) {
-        currLos.push({x: currX, y: currY});
-        currX += xStep;
-        currY += yStep;
-      }
-
-      if (currLos.length) {
-        losList.push(currLos);
-      }
+  const directions = getDirections(map);
+  directions.forEach((dir) => {
+    // console.log(`xStep:${dir.x}, yStep:${dir.y}`);
+    const currLos = getAsteroidsInDirection(map, x, y, dir);
+    if (currLos.length) {
+      losList.push(currLos);
     }
-  }
+  });
 
   return losList;
 }
@@ -124,13 +156,59 @@ const findBestLocation = (map) => {
   }
 
   console.log(`MAX: ${maxSpotCount} spotted @ ${maxSpotLocation.x},${maxSpotLocation.y}`);
+  return maxSpotLocation;
 }
+
+const dirToIndex = (dir) => { return `${dir.x}:${dir.y}` }
+
+const getTargets = (map, x, y) => {
+  const directions = getDirections(map);
+  let targets = {}
+  directions.forEach((dir) => {
+    const inDir = getAsteroidsInDirection(map, x, y, dir);
+    if (inDir.length) {
+      targets[dirToIndex(dir)] = inDir;
+    }
+  })
+
+  return targets;
+}
+
+const pewpew = (map, x, y) => {
+  const directions = getDirections(map);
+  let targets = getTargets(map, x, y);
+  let emptyCycle = false
+  let pewCount = 0;
+
+  while (!emptyCycle) {
+    emptyCycle = true;
+    directions.forEach((dir) => {
+      if (targets[dirToIndex(dir)]) {
+        emptyCycle = false;
+        pewCount++;
+        const pew = targets[dirToIndex(dir)].shift()
+
+        if (pewCount == 200) {
+          console.log(`PEW #${pewCount}: ${pew.x},${pew.y}  VALUE: ${pew.x * 100 + pew.y}`)
+        }
+
+        if (targets[dirToIndex(dir)].length == 0) {
+          delete targets[dirToIndex(dir)];
+        }
+      }
+    })
+  }
+}
+
 
 const run = () => {
   const map = readStringArrayFromFile("./day10.txt", "\n").filter((st) => {return st.length > 0});
 
   // console.log(map);
   console.log(`SIZE: ${getMaxX(map) + 1} x ${getMaxY(map) + 1}`);
+
+  // const directions = getDirections(map);
+  // console.log(directions);
 
   // const losList = getLinesOfSight(map, 0, 2);
   // console.log(losList);
@@ -141,7 +219,8 @@ const run = () => {
   // const chart = findBestLocationChart(map);
   // console.log(chart);
 
-  findBestLocation(map);
+  let {x, y} = findBestLocation(map);
+  pewpew(map, x, y);
 }
 
 module.exports = {run}
