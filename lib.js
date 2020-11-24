@@ -4,13 +4,12 @@ const sum = (arr) => {
   return arr.reduce((tot, curr) => { return (tot + curr)}, 0);
 }
 
-const readStringArrayFromFile = (filename, delimParam) => {
-  const delim = delimParam ? delimParam : "\n";
+const readStringArrayFromFile = (filename, delim) => {
   return fs.readFileSync(filename).toString().split(delim);
 }
 
-const readArrayFromFile = (filename, delimParam) => {
-  return readStringArrayFromFile(filename, delimParam).map((st) => {return parseInt(st)});
+const readArrayFromFile = (filename, delim) => {
+  return readStringArrayFromFile(filename, delim).map((st) => {return parseInt(st)});
 }
 
 const readListsFromFile = (filename) => {

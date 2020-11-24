@@ -25,9 +25,9 @@ const fuelRequiredWithFuel = (baseMass) => {
 }
 
 const run = () => {
-  const components = readArrayFromFile("./day1.txt");
+  const components = readArrayFromFile("./day1.txt", "\n");
   console.log("total: ", fuelRequired(components));
   console.log("total w/recur: ", fuelRequiredWithFuel(components));
 }
 
-module.exports = { run, readArrayFromFile, fuelRequiredWithFuel, fuelRequired};
+module.exports = { run };
