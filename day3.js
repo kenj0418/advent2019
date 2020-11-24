@@ -59,7 +59,7 @@ const combinedStepDistance = (path1, path2, point) => {
 }
 
 const run = () => {
-  const wires = readListsFromFile("./day3.txt");
+  const wires = readListsFromFile("./input/day3.txt");
   // console.log(wires);
 
   const paths = wires.map(computePath);

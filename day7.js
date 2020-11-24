@@ -111,7 +111,7 @@ const findLargestMultiPass = (initialProgram) => {
 }
 
 const run = () => {
-  const initialProgram = readArrayFromFile("./day7.txt", ",");
+  const initialProgram = readArrayFromFile("./input/day7.txt", ",");
   findLargestOnePass(initialProgram);
   findLargestMultiPass(initialProgram);
 }

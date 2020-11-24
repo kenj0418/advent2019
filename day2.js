@@ -25,7 +25,7 @@ const runOne = (masterProgram, noun, verb) => {
 
 
 const run = () => {
-  const masterProgram = readArrayFromFile("./day2.txt", ",");
+  const masterProgram = readArrayFromFile("./input/day2.txt", ",");
   // runOne(masterProgram, 12, 2);
   findNounVerb(masterProgram);
 

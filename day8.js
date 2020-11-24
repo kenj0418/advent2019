@@ -61,7 +61,7 @@ const combineLayers = (layers) => {
 }
 
 const run = () => {
-  const data = readStringArrayFromFile("./day8.txt", "");
+  const data = readStringArrayFromFile("./input/day8.txt", "");
   const width = 25;
   const height = 6;
   const layers = splitIntoLayers(data, width, height);

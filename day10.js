@@ -202,7 +202,7 @@ const pewpew = (map, x, y) => {
 
 
 const run = () => {
-  const map = readStringArrayFromFile("./day10.txt", "\n").filter((st) => {return st.length > 0});
+  const map = readStringArrayFromFile("./input/day10.txt", "\n").filter((st) => {return st.length > 0});
 
   // console.log(map);
   console.log(`SIZE: ${getMaxX(map) + 1} x ${getMaxY(map) + 1}`);

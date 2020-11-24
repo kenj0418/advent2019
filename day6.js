@@ -1,7 +1,7 @@
 const {readStringArrayFromFile} = require("./lib");
 
 const getOrbits = () => {
-  const orbits = readStringArrayFromFile("./day6.txt", "\n").map((st) => {
+  const orbits = readStringArrayFromFile("./input/day6.txt", "\n").map((st) => {
     const pair = st.split(")");
     return {
       center: pair[0],
