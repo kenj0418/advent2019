@@ -88,16 +88,35 @@ const calculateSystemEnergy = (moons) => {
   console.log(`TOTAL ENERGY: ${totalSystemEnergy}`);
 }
 
+const simulateUntilRepeat = (moons) => {
+  let states = [];
+  let found = false;
+
+  while (!found) {
+    const currState = JSON.stringify(moons);
+    const firstMatch = states.indexOf(currState);
+    if (firstMatch >= 0) {
+      found = true;
+      console.log(`REPEATING ${firstMatch} == ${states.length}`);
+    } else {
+      states.push(currState);
+      if (states.length % 1000 == 0) {console.log(`@ ${states.length}`)};
+      simulationStep(moons);
+    }
+  }
+}
+
 const run = () => {
   const moonData = readStringArrayFromFile("./input/day12.txt", "\n");
   // console.log(moonData);
   const moons = parseMoonData(moonData);
   // console.log(moons);
 
-  simulate(moons, 1000);
-  //console.log(moons);
+  // simulate(moons, 1000);
+  // console.log(moons);
+  // calculateSystemEnergy(moons);
 
-  calculateSystemEnergy(moons);
+  simulateUntilRepeat(moons);
 }
 
 module.exports = { run }
