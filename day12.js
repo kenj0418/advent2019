@@ -88,21 +88,61 @@ const calculateSystemEnergy = (moons) => {
   console.log(`TOTAL ENERGY: ${totalSystemEnergy}`);
 }
 
+const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199]; 
+
+const getStateValueForCoord = (coord, primeOffset) => {
+  // return primes[primeOffset] ^ coord.x * primes[primeOffset + 1] ^ coord.y * primes[primeOffset + 2] ^ coord.z;
+  return `${coord.x},${coord.y},${coord.z}`;
+}
+
+const getStateValueForMoon = (moon, primeOffset) => {
+  // return getStateValueForCoord(moon.position, primeOffset) * getStateValueForCoord(moon.velocity, primeOffset + 3);
+  return `${getStateValueForCoord(moon.position)}>${getStateValueForCoord(moon.velocity)}`;
+}
+
+const getStateValueForSystem = (moons) => {
+  // let value = 1;
+  // for (let i = 0; i < moons.length; i++) {
+  //   value *= getStateValueForMoon(moons[i], i * 6);
+  // }  
+  let value = ""
+  for (let i = 0; i < moons.length; i++) {
+    value += getStateValueForMoon(moons[i]);
+    value += ":"
+  }  
+  return value;
+}
+
 const simulateUntilRepeat = (moons) => {
   let states = [];
   let found = false;
+  let i = 0;
 
   while (!found) {
-    const currState = JSON.stringify(moons);
-    const firstMatch = states.indexOf(currState);
-    if (firstMatch >= 0) {
+    i++
+    if (i % 1000000 == 0) {console.log(`@ ${i}`)};
+    const stateValue = getStateValueForSystem(moons);
+    // console.log(`stateValue: ${stateValue}`);
+    if (states[stateValue]) {
       found = true;
-      console.log(`REPEATING ${firstMatch} == ${states.length}`);
+      console.log(`REPEATING ${states[stateValue]} == ${i}`);
     } else {
-      states.push(currState);
-      if (states.length % 1000 == 0) {console.log(`@ ${states.length}`)};
+      states[stateValue] = i;
       simulationStep(moons);
     }
+  }
+}
+
+const simulateUntilRepeatSpeedEstimate = (moons) => {
+  let states = [];
+  let found = false;
+  let i = 0;
+
+  while (!found) {
+    i++
+    if (i % 1000000 == 0) {console.log(`@ ${i}`)};
+    simulationStep(moons);
+    if (i == 46867749) {found = true};
   }
 }
 
@@ -116,7 +156,12 @@ const run = () => {
   // console.log(moons);
   // calculateSystemEnergy(moons);
 
-  simulateUntilRepeat(moons);
+  const startTime = new Date().getTime();
+  // simulateUntilRepeat(moons);
+  simulateUntilRepeatSpeedEstimate(moons);
+  const endTime = new Date().getTime();
+  const durr = Math.round((endTime - startTime) / 1000) * 100; // div 1000 for ms->s mult 100 since stopping at 1% done
+  console.log(`${durr} s   (${Math.round(durr/60)} min)`);
 }
 
 module.exports = { run }
