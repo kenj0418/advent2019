@@ -1,4 +1,5 @@
 const {readStringArrayFromFile} = require("./lib");
+const lcm = require( 'compute-lcm' );
 
 const parseMoon = (line) => {
   const cleanedLine = line.replace(/[ xyz=\<\>]/g, "")
@@ -17,9 +18,7 @@ const parseMoon = (line) => {
 const parseMoonData = (data) => {
   let moons = [];
   data.forEach((line) => {
-    if (line.length) {
-      moons.push(parseMoon(line));
-    }
+    moons.push(parseMoon(line));
   });
 
   return moons;
@@ -40,7 +39,8 @@ const applyGravityToPair = (m1, m2) => {
   m2.velocity.z += zDiff;
 }
 
-const applyGravity = (moons) => {
+const applyGravityPairwise = (moons) => {
+  // this was doing it pair by pair
   for (let i = 0; i < moons.length; i++) {
     for (let j = i + 1; j < moons.length; j++) {
         applyGravityToPair(moons[i], moons[j]);
@@ -57,7 +57,7 @@ const applyVelocity = (moons) => {
 }
 
 const simulationStep = (moons) => {
-  applyGravity(moons);
+  applyGravityPairwise(moons);
   applyVelocity(moons);
 }
 
@@ -88,23 +88,15 @@ const calculateSystemEnergy = (moons) => {
   console.log(`TOTAL ENERGY: ${totalSystemEnergy}`);
 }
 
-const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199]; 
-
 const getStateValueForCoord = (coord, primeOffset) => {
-  // return primes[primeOffset] ^ coord.x * primes[primeOffset + 1] ^ coord.y * primes[primeOffset + 2] ^ coord.z;
   return `${coord.x},${coord.y},${coord.z}`;
 }
 
 const getStateValueForMoon = (moon, primeOffset) => {
-  // return getStateValueForCoord(moon.position, primeOffset) * getStateValueForCoord(moon.velocity, primeOffset + 3);
   return `${getStateValueForCoord(moon.position)}>${getStateValueForCoord(moon.velocity)}`;
 }
 
 const getStateValueForSystem = (moons) => {
-  // let value = 1;
-  // for (let i = 0; i < moons.length; i++) {
-  //   value *= getStateValueForMoon(moons[i], i * 6);
-  // }  
   let value = ""
   for (let i = 0; i < moons.length; i++) {
     value += getStateValueForMoon(moons[i]);
@@ -134,20 +126,99 @@ const simulateUntilRepeat = (moons) => {
 }
 
 const simulateUntilRepeatSpeedEstimate = (moons) => {
-  let states = [];
   let found = false;
   let i = 0;
 
   while (!found) {
     i++
+    // const stateValue = getStateValueForSystem(moons);
     if (i % 1000000 == 0) {console.log(`@ ${i}`)};
     simulationStep(moons);
-    if (i == 46867749) {found = true};
+    if (i == 8686775) {found = true};
+  }
+}
+
+const applyGravityOneDimensionPairwise = (m1, m2) => {
+  const diff = Math.sign(m1.position - m2.position);
+
+  m1.velocity -= diff;
+  m2.velocity += diff;
+}
+
+const applyGravityOneDimension = (moons) => {
+  for (let m1 = 0; m1 < moons.length; m1++) {
+    for (let m2 = m1 + 1; m2 < moons.length; m2++) {
+      applyGravityOneDimensionPairwise(moons[m1], moons[m2]);
+    }
+  }
+}
+
+const applyVelocityOneDimension = (moons) => {
+  moons.forEach((moon) => {
+    moon.position += moon.velocity
+  })
+}
+
+const simulationStepOneDimension = (moons) => {
+  applyGravityOneDimension(moons);
+  applyVelocityOneDimension(moons);
+}
+
+const getStateOneDimension = (moons) => {
+  let state = "";
+  moons.forEach((moon) => {
+    state += `${moon.position},${moon.velocity}\t`
+  })
+
+  return state;
+}
+
+const isSame = (s1, s2) => {
+  // if s1.length != s2.length return false;
+  for (let i = 0; i < s1.length; i++) {
+    if (s1[i].position != s2[i].position || s1[i].velocity != s2[i].velocity) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// const findFirstRepeat = (moons) => {
+//   const initialState = getStateOneDimension(moons)
+//   console.log(initialState + "  ** INITIAL **");
+//   let states = [initialState]
+
+//   while (true) {
+//     simulationStepOneDimension(moons);
+//     const currState = getStateOneDimension(moons);
+//     if (states.indexOf(currState) >= 0) {
+//       console.log(currState + "  ** MATCHED **");
+//       return states.length
+//     }
+
+//     console.log(currState);
+//     states.push(currState);
+//   }
+// }
+
+const findFirstRepeat = (moons) => {
+  const initial = JSON.parse(JSON.stringify(moons));
+  let i = 1
+
+  while (true) {
+    simulationStepOneDimension(moons);
+    const currState = getStateOneDimension(moons);
+    if (isSame(initial, moons)) {
+      return i;
+    }
+
+    i++;
   }
 }
 
 const run = () => {
-  const moonData = readStringArrayFromFile("./input/day12.txt", "\n");
+  const moonData = readStringArrayFromFile("./input/day12.txt", "\n").filter(st => {return st.length > 0});
   // console.log(moonData);
   const moons = parseMoonData(moonData);
   // console.log(moons);
@@ -157,11 +228,43 @@ const run = () => {
   // calculateSystemEnergy(moons);
 
   const startTime = new Date().getTime();
-  // simulateUntilRepeat(moons);
-  simulateUntilRepeatSpeedEstimate(moons);
+  
+  const moonX = moons.map((moon) => {
+    return {
+      position: moon.position.x,
+      velocity: 0
+    }
+  });
+
+  const moonY = moons.map((moon) => {
+    return {
+      position: moon.position.y,
+      velocity: 0
+    }
+  });
+
+  const moonZ = moons.map((moon) => {
+    return {
+      position: moon.position.z,
+      velocity: 0
+    }
+  });
+
+  const repeatX = findFirstRepeat(moonX);
+  console.log(`first repeat of X at: ${repeatX}`);
+
+  const repeatY = findFirstRepeat(moonY);
+  console.log(`first repeat of Y at: ${repeatY}`);
+
+  const repeatZ = findFirstRepeat(moonZ);
+  console.log(`first repeat of Z at: ${repeatZ}`);
+
+  const lcmXYZ = lcm(repeatX, repeatY, repeatZ);
+  console.log(`first repeat of all at: ${lcmXYZ}`);
+
   const endTime = new Date().getTime();
-  const durr = Math.round((endTime - startTime) / 1000) * 100; // div 1000 for ms->s mult 100 since stopping at 1% done
-  console.log(`${durr} s   (${Math.round(durr/60)} min)`);
+  const durr = Math.round((endTime - startTime) / 1000); // div 1000 for ms->s
+  console.log(`${durr} s`);
 }
 
 module.exports = { run }
