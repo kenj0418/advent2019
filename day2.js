@@ -1,5 +1,5 @@
 const {readArrayFromFile} = require("./lib");
-const {executeProgram} = require("./computer");
+const {executeProgram} = require("./computerfunc");
 
 const findNounVerb = (masterProgram) => {
   for (let noun = 0; noun <= 99; noun++) {
