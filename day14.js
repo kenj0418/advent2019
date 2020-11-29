@@ -66,7 +66,7 @@ const findMinimumOreNeeded = (reactions, targetMaterial, targetQty) => {
   let oreUsed = 0;
 
   while (true) {
-    console.log(`Trying with ${oreUsed} ORE`);
+    if ((oreUsed & 1023) == 0) {console.log(`Trying with ${oreUsed} ORE`);}
 
     let baseInv = {};
     baseInv["ORE"] = oreUsed;
